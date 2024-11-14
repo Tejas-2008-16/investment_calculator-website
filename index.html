@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-image: url('background_image.png'); /* Replace with the correct path */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        h1.page-header {
+            color: #fff;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7), 
+                         -2px -2px 5px rgba(0, 0, 0, 0.4), 
+                         1px 1px 2px rgba(255, 255, 255, 0.4);
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 400px;
+            margin-bottom: 20px;
+        }
+        .container h1 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            font-weight: bold;
+            color: #555;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .output {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            color: #333;
+        }
+        canvas {
+            max-width: 100%;
+            height: 400px;
+        }
+    </style>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<h1 class="page-header">Investment Calculator</h1>
+
+<div class="container">
+    <h1>Investment Calculator</h1>
+
+    <label for="investment">Investment Amount (in Rs.):</label>
+    <input type="number" id="investment" placeholder="Enter amount" required>
+
+    <label for="rate">Interest Rate (%):</label>
+    <input type="number" id="rate" placeholder="Enter annual interest rate" required>
+
+    <label for="years">Investment Duration (Years):</label>
+    <input type="number" id="years" placeholder="Enter number of years" required>
+
+    <label for="compoundFreq">Compounding Frequency:</label>
+    <select id="compoundFreq">
+        <option value="1">Annually</option>
+        <option value="2">Semi-Annually</option>
+        <option value="4">Quarterly</option>
+        <option value="12">Monthly</option>
+        <option value="365">Daily</option>
+    </select>
+
+    <button onclick="calculateCompoundInterest()">Calculate Future Value</button>
+
+    <div id="output" class="output"></div>
+</div>
+
+<!-- Canvas for the Chart -->
+<canvas id="investmentChart"></canvas>
+
+<script>
+    function calculateCompoundInterest() {
+        const principal = parseFloat(document.getElementById("investment").value);
+        const rate = parseFloat(document.getElementById("rate").value) / 100;
+        const years = parseInt(document.getElementById("years").value);
+        const n = parseInt(document.getElementById("compoundFreq").value);
+
+        // Compound Interest Formula: A = P * (1 + r/n)^(n*t)
+        const amount = principal * Math.pow((1 + rate / n), (n * years));
+        const futureValue = amount.toFixed(2);
+        document.getElementById("output").innerHTML = `Future Value: ₹${futureValue}`;
+
+        // Generate Data for Chart
+        const labels = [];
+        const data = [];
+        for (let year = 1; year <= years; year++) {
+            const yearlyAmount = principal * Math.pow((1 + rate / n), n * year);
+            labels.push(`Year ${year}`);
+            data.push(yearlyAmount.toFixed(2));
+        }
+
+        // Create or Update the Chart
+        const ctx = document.getElementById("investmentChart").getContext("2d");
+        if (window.myChart) {
+            window.myChart.destroy();
+        }
+        window.myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Investment Growth Over Time (Rs.)',
+                    data: data,
+                    borderColor: '#007bff', // Bold blue color for better visibility
+                    backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                    borderWidth: 3, // Thicker line
+                    pointBackgroundColor: '#007bff', // Make points more visible
+                    pointRadius: 4, // Larger points
+                    fill: true,
+                    tension: 0.3 // Smooth curve
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Years',
+                            color: '#333',
+                            font: {
+                                weight: 'bold'
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)' // Darker grid lines
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Amount (Rs.)',
+                            color: '#333',
+                            font: {
+                                weight: 'bold'
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)' // Darker grid lines
+                        },
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#333',
+                            font: {
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
